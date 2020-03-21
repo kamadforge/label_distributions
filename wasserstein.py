@@ -38,7 +38,7 @@ class Net(nn.Module):
 
 
 y=[]; x=[]
-with open('../data/protein/CASP.csv') as file:
+with open('data/protein/CASP.csv') as file:
     next(file)
     for row in file:
         data_point=row.strip().split(',')
@@ -129,10 +129,15 @@ for perc in train_percentages:
             for ind, (x,y) in enumerate(train_dataset_loader):
                 optimizer.zero_grad()
                 forw=net(x)
-                loss1=criterion(forw, y)
+
+                #Cross-entrop+wasserstein
+                #loss1=criterion(forw.squeeze(), y)
                 #loss_wass=wasserstein_loss(forw)
                 #loss=loss1+loss_wass
-                loss=loss1
+
+                #or simply cross-entropy
+                loss = criterion(forw.squeeze(), y)
+
 
                 loss.backward()
                 optimizer.step()
@@ -142,7 +147,7 @@ for perc in train_percentages:
             for ind, (x,y) in enumerate(test_dataset_loader):
                 i+=1
                 forw=net(x)
-                mse=criterion(forw, y)
+                mse=criterion(forw.squeeze(), y)
                 test_mseloss+=mse
             if ((test_mseloss/i)<best_testmseloss):
                 best_testmseloss=test_mseloss/i
